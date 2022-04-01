@@ -23,7 +23,39 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    raise NotImplementedError()
+    X_dFrame = pd.read_csv(filename)
+
+    # lose duplicate id's
+    X_dFrame = X_dFrame.drop_duplicates(subset=['id'])
+
+    # lose ID, zipcode, lat, long
+    X_dFrame = X_dFrame.drop(['id', 'zipcode', 'lat', 'long'], axis=1)
+
+    # lose duplicate rows
+    X_dFrame = X_dFrame.drop_duplicates()
+
+    # put boundries on all colums
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.price < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.bedroom < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.bathroom < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.sqft_living < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.sqft_lot < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.floors < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.waterfront < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.view < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.view > 4].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.condition < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.grade < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.sqft_above < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.sqft_basement < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.yr_built > 2022].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.yr_renovated < X_dFrame.yr_built].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.yr_renovated < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.sqft_living15 < 0].index)
+    X_dFrame = X_dFrame.drop(X_dFrame[X_dFrame.sqft_lot15 < 0].index)
+    y = pd.Series(X_dFrame.filter(items=['price']))
+
+    return tuple(X_dFrame, y)
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
@@ -43,6 +75,15 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
+    top = X.apply(lambda column: y.cov(column))
+    bottom = X.std(axis=0) * y.std()
+    pc = top.divide(bottom) #todo: Check the division
+        
+
+
+
+
+
     raise NotImplementedError()
 
 
